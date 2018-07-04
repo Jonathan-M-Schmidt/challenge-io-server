@@ -1,0 +1,6 @@
+/node_modules/
+/build/
+/config/
+/dist/
+/test/unit/coverage/
+*.gql

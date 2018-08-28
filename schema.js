@@ -25,6 +25,11 @@ type User {
   challenges: [String]
 }
 
+type AuthObject {
+	user: User!
+	token: String!
+}
+
 type Challenge {
 	_id: String!
 	name: String!
@@ -45,9 +50,9 @@ type Query {
 
 type Mutation {
   createCat(name: String!): Cat!
-  signup(name: String!): String
+  signup(email: String!, name: String!, password: String!): String
   auth(jwt: String!): String
-  createUser(name: String!, email: String!, password: String!): User!
+  userCreate(name: String!, email: String!, password: String!): AuthObject!
 }`;
 
 module.exports = typeDefs;

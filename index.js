@@ -1,10 +1,11 @@
 const express = require( 'express' );
 const bodyParser = require( 'body-parser' );
-const jwt = require( 'express-jwt' );
+
 const cors = require( 'cors' );
 const mongoose = require( 'mongoose' );
 const { ApolloServer } = require( 'apollo-server' );
 const { registerServer } = require( 'apollo-server-express' );
+const { graphiqlExpress } = require( 'apollo-server-express' );
 
 const typeDefs = require( './schema' );
 const resolvers = require( './resolvers' );
@@ -20,10 +21,25 @@ mongoose.connect( process.env.DB_URL_LOCAL );
 const server = new ApolloServer( {
 	typeDefs,
 	resolvers,
+	context: ( { req } ) => {
+		const token = req.headers.authorization || '';
+		return { token };
+	},
 } );
+
+app.use(
+	'/graphiql',
+	graphiqlExpress( {
+		endpointURL: '/graphql',
+	} ),
+);
 
 app.listen( PORT, () => console.log( `server listening on port ${ PORT }` ) );
 
 registerServer( { server, app } );
 
-// app.listen(PORT, () => console.log(`server listening on port ${PORT}`));
+app.use( express.static( './public' ) );
+
+app.get( '/', ( req, res ) => {
+	res.sendFile( `${ __dirname }/public/index.html` );
+} );

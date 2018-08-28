@@ -1,6 +1,8 @@
 const User = require( './models/User' );
 const Challenge = require( './models/Challenge' );
 const mongoose = require( 'mongoose' );
+const bcrypt = require( 'bcrypt' );
+const jwt = require( 'jsonwebtoken' );
 
 const resolvers = {
 	Query: {
@@ -58,41 +60,30 @@ const resolvers = {
 		},
 	},
 	Mutation: {
-		// TODO: use bcrypt to hash password
-		async createUser( parent, args ) {
-			const u = await new User( args ).save();
-			u._id = u._id.toString();
-			return u;
-		},
-		async signup( parent, { name } ) {
-		// TODO: change method to work with users
-			/* console.log('Name: ', name);
-      const cat = await Cat.findOne({ name });
-
-      if (!cat) {
-        console.log('no Cat with that name found');
-      }
- */
-			return token.sign(
-				{ name: cat.name },
-				process.env.JWT_SECRET,
-				{ expiresIn: '1h' },
-			);
-		},
-		async auth( parent, { jwt } ) {
-			let error;
-			let decodedToken;
-			token.verify( jwt, process.env.JWT_SECRET, ( err, decoded ) => {
-				if ( err ) {
-					error = err;
-				}
-				if ( decoded ) {
-					decodedToken = decoded;
-				}
+		async userCreate( parent, { email, name, password } ) {
+			// TODO: Check if email allready exists
+			// return new token
+			const hash = await bcrypt.hash( password, 10 );
+			const user = await User.create( {
+				name,
+				email,
+				password: hash,
 			} );
-			if ( decodedToken ) return decodedToken;
-			return error;
+			const token = jwt.sign( {
+				userName: user.name,
+			}, process.env.JWT_SECRET );
+
+			return {
+				user,
+				token,
+			};
 		},
+		// async userLogin( parent, { email, password } ) {
+		// 	// TODO:
+		// 	// check if user exists
+		// 	// compare password with bcrypt
+		// 	// return new token
+		// },
 	},
 };
 

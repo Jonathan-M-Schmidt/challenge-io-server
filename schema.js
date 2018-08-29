@@ -46,6 +46,7 @@ type Query {
   users(ids: [String]): [User]
   allChallenges: [Challenge!]!
   challenge(id: String!): Challenge
+  login(email: String!, password: String!): AuthObject!
 }
 
 type Mutation {

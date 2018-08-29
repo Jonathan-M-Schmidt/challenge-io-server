@@ -1,11 +1,9 @@
 const express = require( 'express' );
-const bodyParser = require( 'body-parser' );
-
-const cors = require( 'cors' );
 const mongoose = require( 'mongoose' );
 const { ApolloServer } = require( 'apollo-server' );
 const { registerServer } = require( 'apollo-server-express' );
 const { graphiqlExpress } = require( 'apollo-server-express' );
+const history = require( 'connect-history-api-fallback' );
 
 const typeDefs = require( './schema' );
 const resolvers = require( './resolvers' );
@@ -26,7 +24,7 @@ const server = new ApolloServer( {
 		return { token };
 	},
 } );
-
+app.use( history() );
 app.use(
 	'/graphiql',
 	graphiqlExpress( {

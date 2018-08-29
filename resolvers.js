@@ -36,6 +36,23 @@ const resolvers = {
 			const challenge = await Challenge.findOne( objId );
 			return challenge;
 		},
+		async login( parent, { email, password } ) {
+			const user = await User.findOne( { email } );
+			if ( !user ) {
+				throw new Error( 'No User with this Email.' );
+			}
+			const valid = await bcrypt.compare( password, user.password );
+			if ( !valid ) {
+				throw new Error( 'Wrong password.' );
+			}
+			const token = jwt.sign( {
+				userName: user.name,
+			}, process.env.JWT_SECRET );
+			return {
+				user,
+				token,
+			};
+		},
 	},
 	User: {
 		async friends( user ) {
@@ -61,8 +78,10 @@ const resolvers = {
 	},
 	Mutation: {
 		async userCreate( parent, { email, name, password } ) {
-			// TODO: Check if email allready exists
-			// return new token
+			const userExists = await User.findOne( { email } );
+			if ( userExists ) {
+				throw new Error( 'This Email is allready registered.' );
+			}
 			const hash = await bcrypt.hash( password, 10 );
 			const user = await User.create( {
 				name,
@@ -78,12 +97,6 @@ const resolvers = {
 				token,
 			};
 		},
-		// async userLogin( parent, { email, password } ) {
-		// 	// TODO:
-		// 	// check if user exists
-		// 	// compare password with bcrypt
-		// 	// return new token
-		// },
 	},
 };
 

@@ -97,6 +97,29 @@ const resolvers = {
 				token,
 			};
 		},
+		async createChallenge( parent, {
+			name,
+			adminID,
+			bannerImg,
+			dateFrom,
+			dateTill,
+			description,
+		} ) {
+			const nameTaken = await Challenge.findOne( { name } );
+			if ( nameTaken ) {
+				throw new Error( 'This name is allready taken.' );
+			}
+			const imgURL = bannerImg || 'https://wikitravel.org/upload/shared/6/6a/Default_Banner.jpg';
+			const challenge = await Challenge.create( {
+				name,
+				adminID,
+				bannerImg: imgURL,
+				dateFrom,
+				dateTill,
+				description,
+			} );
+			return challenge;
+		},
 	},
 };
 

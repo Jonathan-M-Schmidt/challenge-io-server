@@ -33,6 +33,7 @@ type AuthObject {
 type Challenge {
 	_id: String!
 	name: String!
+	adminID: String!
 	bannerImg: String!
 	dateFrom: String!
 	dateTill: String!
@@ -54,6 +55,14 @@ type Mutation {
   signup(email: String!, name: String!, password: String!): String
   auth(jwt: String!): String
   userCreate(name: String!, email: String!, password: String!): AuthObject!
+  createChallenge(
+	  name: String!,
+	  adminID: String!,
+	  bannerImg: String,
+	  dateFrom: String!,
+	  dateTill: String!,
+	  description: String!,
+  ): Challenge!
 }`;
 
 module.exports = typeDefs;

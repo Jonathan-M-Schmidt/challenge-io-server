@@ -24,7 +24,7 @@ const server = new ApolloServer( {
 		return { token };
 	},
 } );
-app.use( history() );
+// app.use( history() );
 app.use(
 	'/graphiql',
 	graphiqlExpress( {

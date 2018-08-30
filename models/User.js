@@ -20,6 +20,7 @@ module.exports = mongoose.model( 'User', {
 			challenge_id: String,
 		},
 	],
+	challengeInvites: Array,
 	challenges: [
 		{
 			challenge_id: String,

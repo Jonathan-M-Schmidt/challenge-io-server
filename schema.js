@@ -15,14 +15,21 @@ type Rival {
 	challenge_id: String!
 }
 
+type UserOptions {
+	allow_no_friend_rivals: Boolean!
+	push_notifications: Boolean!
+}
+
 type User {
   _id: String!
+  options: UserOptions!
   name: String!
   email: String!
   password: String!
   rivals: [User]
   friends: [User]
   challenges: [String]
+  challengeInvites: [String!]
 }
 
 type AuthObject {
@@ -48,12 +55,11 @@ type Query {
   allChallenges: [Challenge!]!
   challenge(id: String!): Challenge
   login(email: String!, password: String!): AuthObject!
+  auth(token: String!): Boolean!
+  challengesAsAdmin(id: String!): [Challenge]
 }
 
 type Mutation {
-  createCat(name: String!): Cat!
-  signup(email: String!, name: String!, password: String!): String
-  auth(jwt: String!): String
   userCreate(name: String!, email: String!, password: String!): AuthObject!
   createChallenge(
 	  name: String!,
@@ -63,6 +69,8 @@ type Mutation {
 	  dateTill: String!,
 	  description: String!,
   ): Challenge!
+  deleteChallenge(id: String!): Boolean!
+  inviteUsersToChallenge(users: [String!], challengeID: String!): Boolean
 }`;
 
 module.exports = typeDefs;

@@ -20,6 +20,12 @@ type UserOptions {
 	push_notifications: Boolean!
 }
 
+
+type AcceptedChallenges {
+	challenge_id: String!,
+	total_score: Int!,
+}
+
 type User {
   _id: String!
   options: UserOptions!
@@ -28,7 +34,7 @@ type User {
   password: String!
   rivals: [User]
   friends: [User]
-  challenges: [String]
+  challenges: [AcceptedChallenges!]
   challengeInvites: [String!]
 }
 
@@ -54,6 +60,7 @@ type Query {
   users(ids: [String]): [User]
   allChallenges: [Challenge!]!
   challenge(id: String!): Challenge
+  challenges(ids: [String!]): [Challenge!]
   login(email: String!, password: String!): AuthObject!
   auth(token: String!): Boolean!
   challengesAsAdmin(id: String!): [Challenge]
@@ -71,6 +78,7 @@ type Mutation {
   ): Challenge!
   deleteChallenge(id: String!): Boolean!
   inviteUsersToChallenge(users: [String!], challengeID: String!): Boolean
+  acceptInvite(userID:String!, challengeID:String!): User!
 }`;
 
 module.exports = typeDefs;

@@ -1,5 +1,6 @@
 const User = require( './models/User' );
 const Challenge = require( './models/Challenge' );
+const authCheck = require( './helper/authCheck' );
 const mongoose = require( 'mongoose' );
 const bcrypt = require( 'bcrypt' );
 const jwt = require( 'jsonwebtoken' );
@@ -10,7 +11,8 @@ const resolvers = {
 			const users = await User.find();
 			return users;
 		},
-		async user( parent, { id } ) {
+		async user( parent, { id }, context ) {
+			authCheck( context );
 			if ( id === '' ) {
 				throw new Error( 'No ID was given' );
 			}
@@ -34,6 +36,10 @@ const resolvers = {
 			const objId = mongoose.Types.ObjectId( id );
 			const challenge = await Challenge.findOne( objId );
 			return challenge;
+		},
+		async challenges( parent, { ids } ) {
+			const found = await ids.map( id => Challenge.findById( id ) );
+			return found;
 		},
 		async auth( parent, { token } ) {
 			let result = false;
@@ -131,9 +137,17 @@ const resolvers = {
 			return challenge;
 		},
 		async deleteChallenge( parent, { id } ) {
+			// TODO: check if challenge is in active challenges of users
 			if ( id === '' ) {
 				throw new Error( 'No ID was given' );
 			}
+			const users = await User.find( { challengeInvites: id } );
+			users.forEach( ( user ) => {
+				const challengeInvites = user.challengeInvites || [];
+				const filteredInvites = challengeInvites.filter( invite => invite !== id );
+				user.challengeInvites = filteredInvites;
+				user.save();
+			} );
 			const challenge = await Challenge.deleteOne( { _id: id }, ( err ) => {
 				if ( err ) {
 					console.log( err );
@@ -141,7 +155,8 @@ const resolvers = {
 			} );
 			return !!challenge;
 		},
-		async inviteUsersToChallenge( parent, { users, challengeID } ) {
+		async inviteUsersToChallenge( parent, { users, challengeID }, context ) {
+			authCheck( context );
 			return users.forEach( ( user ) => {
 				User.findById( user, ( err, doc ) => {
 					if ( err ) {
@@ -167,6 +182,30 @@ const resolvers = {
 					}
 				} );
 			} );
+		},
+		async acceptInvite( parent, { userID, challengeID }, context ) {
+			// TODO: remove challenge from users invites and add to accepted challenges
+			// add user to challenge
+			authCheck( context );
+			try {
+				const user = await User.findById( userID );
+				const challenge = await Challenge.findById( challengeID );
+
+				const filteredInvites = user.challengeInvites.filter( invite => invite !== challengeID );
+				user.challengeInvites = filteredInvites;
+				const challengeObj = {
+					challenge_id: challengeID,
+					total_score: 0,
+				};
+				user.challenges.push( challengeObj );
+				user.save();
+
+				challenge.users.push( userID );
+				challenge.save();
+				return user;
+			} catch ( err ) {
+				throw err;
+			}
 		},
 	},
 };

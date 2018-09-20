@@ -33,8 +33,7 @@ const resolvers = {
 			return challenges;
 		},
 		async challenge( parent, { id } ) {
-			const objId = mongoose.Types.ObjectId( id );
-			const challenge = await Challenge.findOne( objId );
+			const challenge = await Challenge.findById( id );
 			return challenge;
 		},
 		async challenges( parent, { ids } ) {
@@ -95,7 +94,7 @@ const resolvers = {
 		async userCreate( parent, { email, name, password } ) {
 			const userExists = await User.findOne( { email } );
 			if ( userExists ) {
-				throw new Error( 'This Email is allready registered.' );
+				throw new Error( 'This Email is already registered.' );
 			}
 			const hash = await bcrypt.hash( password, 10 );
 			const user = await User.create( {
@@ -119,7 +118,8 @@ const resolvers = {
 			dateFrom,
 			dateTill,
 			description,
-		} ) {
+		}, context ) {
+			authCheck( context );
 			const nameTaken = await Challenge.findOne( { name } );
 			if ( nameTaken ) {
 				throw new Error( 'This name is allready taken.' );
@@ -136,8 +136,20 @@ const resolvers = {
 			} );
 			return challenge;
 		},
-		async deleteChallenge( parent, { id } ) {
+		async editChallenge( parent, {
+			id, name, description, bannerImg,
+		}, context ) {
+			authCheck( context );
+			const challenge = await Challenge.findByIdAndUpdate(
+				id,
+				{ name, description, bannerImg },
+				{ new: true },
+			);
+			return challenge;
+		},
+		async deleteChallenge( parent, { id }, context ) {
 			// TODO: check if challenge is in active challenges of users
+			authCheck( context );
 			if ( id === '' ) {
 				throw new Error( 'No ID was given' );
 			}
@@ -184,8 +196,6 @@ const resolvers = {
 			} );
 		},
 		async acceptInvite( parent, { userID, challengeID }, context ) {
-			// TODO: remove challenge from users invites and add to accepted challenges
-			// add user to challenge
 			authCheck( context );
 			try {
 				const user = await User.findById( userID );
@@ -206,6 +216,17 @@ const resolvers = {
 			} catch ( err ) {
 				throw err;
 			}
+		},
+		async sendScore( parent, { userID, challengeID, score }, context ) {
+			authCheck( context );
+			const user = await User.findById( userID );
+			user.challenges.forEach( ( chal ) => {
+				if ( chal.challenge_id === challengeID ) {
+					chal.total_score += score;
+				}
+			} );
+			user.save();
+			return user;
 		},
 	},
 };

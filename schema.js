@@ -1,10 +1,6 @@
 const { gql } = require( 'apollo-server' );
 
-const typeDefs = gql`type Cat {
-  _id: String!
-  name: String!
-}
-
+const typeDefs = gql`
 type Friend {
 	id: String!
 	date_friends_since: String!
@@ -76,9 +72,16 @@ type Mutation {
 	  dateTill: String!,
 	  description: String!,
   ): Challenge!
+  editChallenge(
+	  id: String!,
+	  name: String,
+	  bannerImg: String,
+	  description: String,
+  ): Challenge!
   deleteChallenge(id: String!): Boolean!
   inviteUsersToChallenge(users: [String!], challengeID: String!): Boolean
   acceptInvite(userID:String!, challengeID:String!): User!
+  sendScore(userID:String!, challengeID:String!, score: Int!):User!
 }`;
 
 module.exports = typeDefs;

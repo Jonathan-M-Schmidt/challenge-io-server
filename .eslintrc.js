@@ -6,22 +6,11 @@ module.exports = {
   'extends': [
 	'airbnb-base',
   ],
-  /* rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
-  }, */
   parserOptions: {
     parser: 'babel-eslint',
     sourceType: 'module',
   },
   rules: {
-		// don't require .vue extension when importing
-		/* 'import/extensions': [ 'error', 'always', {
-			js: 'never',
-			vue: 'never',
-		} ], */
-		// disallow reassignment of function parameters
-		// disallow parameter object manipulation except for specific exclusions
 		'no-param-reassign': [ 'error', {
 			props: true,
 			ignorePropertyModificationsFor: [
@@ -31,14 +20,11 @@ module.exports = {
 			],
 		} ],
 		'no-underscore-dangle': 'off',
-		// allow optionalDependencies
 		'import/no-extraneous-dependencies': [ 'error', {
 			optionalDependencies: [ 'test/unit/index.js' ],
 		} ],
-		// allow debugger during development
 		'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
 		'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
-		// Ventoro custom settings
 		"import/no-unresolved": "off",
 		indent: [ 2, 'tab' ],
 		'no-tabs': 0,
